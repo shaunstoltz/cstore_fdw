@@ -47,6 +47,10 @@ So we need to install these packages first:
     # Ubuntu 10.4+
     sudo apt-get install protobuf-c-compiler
     sudo apt-get install libprotobuf-c0-dev
+    
+    # Ubuntu 18.4+
+    sudo apt-get install protobuf-c-compiler
+    sudo apt-get install libprotobuf-c-dev
 
     # Mac OS X
     brew install protobuf-c
@@ -67,7 +71,7 @@ installation's bin/ directory path. For example:
     PATH=/usr/local/pgsql/bin/:$PATH make
     sudo PATH=/usr/local/pgsql/bin/:$PATH make install
 
-**Note.** cstore_fdw requires PostgreSQL 9.3, 9.4, 9.5, 9.6 or 10. It doesn't
+**Note.** cstore_fdw requires PostgreSQL version from 9.3 to 12. It doesn't
 support earlier versions of PostgreSQL.
 
 
@@ -115,7 +119,7 @@ most efficient execution plan for each query.
 commands. We also don't support single row inserts.
 
 
-Updating from earlier versions to 1.6
+Updating from earlier versions to 1.7
 ---------------------------------------
 
 To update an existing cstore_fdw installation from versions earlier than 1.6
@@ -173,8 +177,8 @@ OPTIONS(compression 'pglz');
 Next, we load data into the table:
 
 ```SQL
-COPY customer_reviews FROM '/home/user/customer_reviews_1998.csv' WITH CSV;
-COPY customer_reviews FROM '/home/user/customer_reviews_1999.csv' WITH CSV;
+\COPY customer_reviews FROM 'customer_reviews_1998.csv' WITH CSV;
+\COPY customer_reviews FROM 'customer_reviews_1999.csv' WITH CSV;
 ```
 
 **Note.** If you are getting ```ERROR: cannot copy to foreign table
@@ -230,7 +234,7 @@ hosts.  You can easily install and run other PostgreSQL extensions and foreign d
 wrappers—including cstore_fdw—alongside Citus.
 
 You can create a cstore_fdw table and distribute it using the
-```master_create_distributed_table()``` UDF just like any other table. You can load data
+```create_distributed_table()``` UDF just like any other table. You can load data
 using the ```copy``` command as you would do in single node PostgreSQL.
 
 Using Skip Indexes
@@ -284,6 +288,12 @@ the installation:
 
 Changeset
 ---------
+### Version 1.7.0
+* (Fix) Add support for PostgreSQL 12
+* (Fix) Support count(t.*) from t type queries
+* (Fix) Build failures for MacOS 10.14+
+* (Fix) Make foreign scan parallel safe
+* (Fix) Add support for PostgreSQL 11 COPY
 ### Version 1.6.2
 * (Fix) Add support for PostgreSQL 11
 ### Version 1.6.1
