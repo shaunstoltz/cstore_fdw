@@ -1,3 +1,42 @@
+## Important notice: Columnar storage is now part of Citus
+
+Columnar storage is now part of the [Citus extension](https://github.com/citusdata/citus), which uses the table access method API to give a much more native experience. It also supports streaming replication, archival, rollback, and simplifies pg_upgrade. You can use Citus just for columnar storage on a single PostgreSQL server, or combine it with distributed tables to parallelize queries locally or across a cluster of PostgreSQL servers.
+
+Migration is simple, and you'll typically see improved compression thanks to [zstd](https://github.com/facebook/zstd):
+
+```sql
+-- After adding adding shared_preload_libraries = 'citus'
+-- to postgresql.conf and restarting:
+CREATE EXTENSION IF NOT EXISTS citus;
+
+-- Create a table using the columnar access method, with the same columns
+-- as an existing cstore_fdw table
+CREATE TABLE customer_reviews_am (
+  LIKE customer_reviews_fdw INCLUDING ALL
+) USING columnar;
+
+-- Copy data from an old cstore_fdw table to an access method table
+INSERT INTO customer_reviews_am SELECT * FROM customer_reviews_fdw;
+
+-- cstore_fdw data size
+SELECT pg_size_pretty(cstore_table_size('customer_reviews_fdw'));
+┌────────────────┐
+│ pg_size_pretty │
+├────────────────┤
+│ 100 MB         │
+└────────────────┘
+
+-- Citus Columnar data size
+SELECT pg_size_pretty(pg_table_size('customer_reviews_am'));
+┌────────────────┐
+│ pg_size_pretty │
+├────────────────┤
+│ 64 MB          │
+└────────────────┘
+```
+
+Read more about it in the [Citus columnar blog post](https://www.citusdata.com/blog/2021/03/06/citus-10-columnar-compression-for-postgres/) by Jeff Davis.
+
 cstore_fdw
 ==========
 
@@ -358,7 +397,7 @@ Changeset
 Copyright
 ---------
 
-Copyright (c) 2017 Citus Data, Inc.
+Copyright (c) Citus Data, Inc.
 
 This module is free software; you can redistribute it and/or modify it under the
 Apache v2.0 License.
